@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dėdės Luko puikusis grafiko dėliotojas 3000</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1500px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        h1, h2, h3 {
+            color: #222;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input, select, textarea, button {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        textarea {
+            min-height: 220px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            background: #222;
+            color: white;
+            width: fit-content;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        button:hover {
+            opacity: 0.92;
+        }
+
+        .delete-btn {
+            background: #b42318;
+        }
+
+        .generate-btn {
+            background: #067647;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        .small-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .count-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #efefef;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .status-ok {
+            color: #067647;
+            font-weight: bold;
+        }
+
+        .status-bad {
+            color: #b42318;
+            font-weight: bold;
+        }
+
+        .worker-day-box {
+            max-height: 260px;
+            overflow-y: auto;
+            background: #fafafa;
+            border: 1px solid #e6e6e6;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .parsed-line {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #ececec;
+        }
+
+        .fit-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            margin-right: 6px;
+            margin-top: 6px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .ok-badge {
+            background: #d1fadf;
+            color: #067647;
+        }
+
+        .no-badge {
+            background: #fee4e2;
+            color: #b42318;
+        }
+
+        .warning-list {
+            margin: 8px 0 0 0;
+            padding-left: 18px;
+            color: #b42318;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            text-align: center;
+        }
+
+        .weekday-cell {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .shift-slot {
+            min-width: 180px;
+        }
+
+        .muted {
+            color: #888;
+        }
+
+        .main-title {
+            font-size: 34px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            margin-top: 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">Dėdės Luko puikusis grafiko dėliotojas 3000</h1>
+    <p class="subtitle">Automatinis darbuotojų grafiko generatorius</p>
+
+    <div class="box">
+        <h2>Grafiko nustatymai</h2>
+        <form action="/save_settings" method="POST">
+            <div class="row">
+                <label for="month"><strong>Mėnuo:</strong></label>
+                <select name="month" id="month" required>
+                    <option value="1" {% if selected_month == 1 %}selected{% endif %}>Sausis</option>
+                    <option value="2" {% if selected_month == 2 %}selected{% endif %}>Vasaris</option>
+                    <option value="3" {% if selected_month == 3 %}selected{% endif %}>Kovas</option>
+                    <option value="4" {% if selected_month == 4 %}selected{% endif %}>Balandis</option>
+                    <option value="5" {% if selected_month == 5 %}selected{% endif %}>Gegužė</option>
+                    <option value="6" {% if selected_month == 6 %}selected{% endif %}>Birželis</option>
+                    <option value="7" {% if selected_month == 7 %}selected{% endif %}>Liepa</option>
+                    <option value="8" {% if selected_month == 8 %}selected{% endif %}>Rugpjūtis</option>
+                    <option value="9" {% if selected_month == 9 %}selected{% endif %}>Rugsėjis</option>
+                    <option value="10" {% if selected_month == 10 %}selected{% endif %}>Spalis</option>
+                    <option value="11" {% if selected_month == 11 %}selected{% endif %}>Lapkritis</option>
+                    <option value="12" {% if selected_month == 12 %}selected{% endif %}>Gruodis</option>
+                </select>
+
+                <label for="year"><strong>Metai:</strong></label>
+                <input type="number" name="year" id="year" value="{{ selected_year }}" min="2000" max="2100" required>
+
+                <button type="submit">Išsaugoti nustatymus</button>
+            </div>
+        </form>
+
+        <p class="small-text">
+            Šiam mėnesiui reikia <strong>{{ expected_days }}</strong> dienų įrašų kiekvienam darbuotojui.
+        </p>
+
+        <p class="small-text">
+            <strong>Pr–Kt:</strong> 10:00–18:30, 13:00–21:30<br>
+            <strong>Pn–Sk:</strong> 10:00–18:30, 13:00–21:30, 15:00–21:30
+        </p>
+    </div>
+
+    <div class="box">
+        <h2>Pridėti darbuotoją</h2>
+        <form action="/add_worker" method="POST">
+            <input type="text" name="name" placeholder="Darbuotojo vardas" required>
+
+            <select name="etatas" required>
+                <option value="">Pasirink etatą</option>
+                <option value="0.25">0.25</option>
+                <option value="0.5">0.5</option>
+                <option value="0.75">0.75</option>
+                <option value="1.0">1.0</option>
+            </select>
+
+            <label for="availability"><strong>Mėnesio galimumas</strong></label>
+            <div class="small-text">
+                Įklijuok tiesiai iš Excel.<br>
+                <strong>Viena eilutė = viena diena.</strong>
+            </div>
+
+            <textarea
+                name="availability"
+                id="availability"
+                placeholder="Įklijuok vieną Excel stulpelį čia..."
+            ></textarea>
+
+            <button type="submit">Pridėti darbuotoją</button>
+        </form>
+    </div>
+
+    <div class="box">
+        <h2>Sugeneruoti mėnesio grafiką</h2>
+        <form action="/generate_schedule" method="POST">
+            <button type="submit" class="generate-btn">Sugeneruoti grafiką</button>
+        </form>
+    </div>
+
+    <div class="box">
+        <h2>Darbuotojai</h2>
+
+        {% if workers %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vardas</th>
+                        <th>Etatas</th>
+                        <th>Įrašai</th>
+                        <th>Statusas</th>
+                        <th>Atpažinta informacija pagal dieną</th>
+                        <th>Veiksmas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for worker in workers %}
+                    <tr>
+                        <td>{{ worker.name }}</td>
+                        <td>{{ worker.etatas }}</td>
+                        <td><span class="count-badge">{{ worker.day_count }} / {{ expected_days }}</span></td>
+                        <td>
+                            {% if worker.status == "Gerai" %}
+                                <span class="status-ok">{{ worker.status }}</span>
+                            {% else %}
+                                <span class="status-bad">{{ worker.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="worker-day-box">
+                                {% for item in worker.parsed_availability %}
+                                    <div class="parsed-line">
+                                        <div><strong>{{ item.day }} {{ item.weekday_name }}</strong> — {{ item.original }}</div>
+                                        <div class="small-text">{{ item.parsed_text }}</div>
+
+                                        {% for fit in item.shift_fit %}
+                                            {% if fit.ok %}
+                                                <span class="fit-badge ok-badge">{{ fit.assigned_start }}-{{ fit.assigned_end }} ✓</span>
+                                            {% else %}
+                                                <span class="fit-badge no-badge">{{ fit.start }}-{{ fit.end }} ✗</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <form action="/delete_worker/{{ loop.index0 }}" method="POST">
+                                <button type="submit" class="delete-btn">Ištrinti</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Dar nėra pridėtų darbuotojų.</p>
+        {% endif %}
+    </div>
+
+    {% if generated_schedule %}
+    <div class="box">
+        <h2>Sugeneruotas grafikas</h2>
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>Diena</th>
+                    <th>Savaitės diena</th>
+                    <th class="shift-slot">Pamaina 1</th>
+                    <th class="shift-slot">Pamaina 2</th>
+                    <th class="shift-slot">Pamaina 3</th>
+                    <th>Įspėjimai</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in generated_schedule %}
+                <tr>
+                    <td>{{ day.day }}</td>
+                    <td class="weekday-cell">{{ day.weekday_name }}</td>
+
+                    {% for assignment in day.assignments %}
+                        <td class="shift-slot">
+                            <strong>{{ assignment.shift_time }}</strong><br>
+                            {% if assignment.worker_name %}
+                                {{ assignment.worker_name }}
+                            {% else %}
+                                <span class="muted">-</span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+
+                    {% if day.assignments|length < 3 %}
+                        {% for _ in range(3 - day.assignments|length) %}
+                            <td class="shift-slot"><span class="muted">-</span></td>
+                        {% endfor %}
+                    {% endif %}
+
+                    <td>
+                        {% if day.warnings %}
+                            <ul class="warning-list">
+                                {% for warning in day.warnings %}
+                                    <li>{{ warning }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            Gerai
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if worker_summary %}
+    <div class="box">
+        <h2>Krūvio suvestinė</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Vardas</th>
+                    <th>Etatas</th>
+                    <th>Pamainų sk.</th>
+                    <th>Dirbtos valandos</th>
+                    <th>Reikalingos valandos</th>
+                    <th>Skirtumas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in worker_summary %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.etatas }}</td>
+                    <td>{{ item.assigned_shifts }}</td>
+                    <td>{{ item.assigned_hours }}</td>
+                    <td>{{ item.target_hours }}</td>
+                    <td>{{ item.hours_difference }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</body>
+</html>
